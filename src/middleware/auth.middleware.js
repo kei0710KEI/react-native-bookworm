@@ -1,31 +1,20 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// const response = await fetch("http://localhost:3000/api/hooks", {
-//     method: "POST",
-//     body: JSON.stringify({
-//         title,
-//         caption
-//     }),
-//     headers: { Authorization: `Bearer ${token}` },
-// });
-
 const protectRoute = async (req, res, next) => {
   try {
-    const token = req.headers("Authorization").replace("Bearer ", "");
-    if (!token)
-      return res
-        .status(401)
-        .json({ message: "No authorization token, access denied" });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "No authorization token, access denied" });
+    }
 
-    //verify token
+    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    //find user
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) return res.status(401).json({ message: "Token is not valid" });
 
-    res.user = user;
+    req.user = user; // ✅ 修正箇所
     next();
   } catch (error) {
     console.log("Authorization error:", error.message);

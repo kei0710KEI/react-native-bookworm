@@ -14,6 +14,7 @@ router.post("/", protectRoute, async (req, res) => {
     }
 
     //upload image to cloudinary
+    console.log("Uploading image:", image);
     const uploadResponse = await cloudinary.uploader.upload(image);
     const imageUrl = uploadResponse.secure_url;
     //save image to the database
@@ -30,7 +31,7 @@ router.post("/", protectRoute, async (req, res) => {
     res.status(201).json(newBook);
   } catch (error) {
     console.log("Error creating book", error);
-    res.status(500).json({ message: "error.message" });
+    res.status(500).json({ message: error.message });
   }
 });
 
